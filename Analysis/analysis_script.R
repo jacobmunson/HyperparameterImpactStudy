@@ -2,18 +2,44 @@ library(tidyverse)
 library(ggpubr)
 
 
-# PMF results for ML100k, ML1M, Jester, ML10M
+## PMF results for ML100k, ML1M, Jester, ML10M
 # I do not have BPMF results for Jester (running now, as of 6/4)
 D1 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_ml100k.csv")
 D2 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_ml1m.csv")
 D3 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_jester.csv")
 D4 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_ml10m.csv")
 
+## Some dataset summary statistics
+# Dataset       | users  | items  | ratings  | density
+# ------------------------------------------------------------------------------
+# ML100k (D1)   | 610    | 9724   | 100836   | 0.01699968 = 100836/(610*9724)
+# ML1M (D2)     | 6040   | 3706   | 1000209  | 0.04468363 = 1000209/(6040*3706)
+# Book Crossing | 105283 | 340553 | 1149780  | 0.00003206799 = 1149780/(105283*340553)
+# Jester (D3)   | 73421  | 100    | 4136360  | 0.5633756 = 4136360/(73421*100) 
+# ML10M (D4)    | 69878  | 10677  | 10000054 | 0.01340333 = 10000054/(69878*10677)
+# ML20M         | 138493 | 26744  | 20000263 | 0.005399848 = 20000263/(138493*26744)
+
+#D1$num_users = 610; D1$num_items = 9724; D1$num_ratings = 100836; D1$density = 0.01699968    # may need this information eventually - keeping hard-coded here
+#D2$num_users = 6040; D2$num_items = 3706; D2$num_ratings = 1000209; D2$density = 0.04468363
+#D3$num_users = 73421; D3$num_items = 100; D3$num_ratings = 4136360; D3$density = 0.5633756
+#D4$num_users = 69878; D4$num_items = 10677; D4$num_ratings = 10000054; D4$density = 0.01340333
+
+
+
+
+
 # Minor data cleaning
 D = bind_rows(D1, D2, D3, D4)
 D[which(D$datasets == "jester"),"datasets"] = "Jester"
 D = D %>% mutate(datasets = as.factor(datasets), lf = as.factor(lf)) #iter = as.factor(iter))
-D$datasets = factor(D$datasets, levels = c("ML100k", "ML1M", "Jester", "ML10M"))
+
+
+D$datasets = factor(D$datasets, levels = c("ML100k", "ML1M", "Jester", "ML10M")) # arranged by dataset size
+D$datasets = factor(D$datasets, levels = c("ML100k", "ML1M", "ML10M", "Jester")) # arranged by number of users
+D$datasets = factor(D$datasets, levels = c("Jester", "ML1M", "ML100k", "ML10M")) # arranged by number of items
+D$datasets = factor(D$datasets, levels = c("ML10M", "ML100k", "ML1M", "Jester")) # arranged by density
+
+
 
 
 # Panel of PMF results
@@ -138,6 +164,7 @@ summary(lm(pmf_rmse ~ datasets + lf + max_epoch_pmf - 1, data = D))
 
 summary(lm(pmf_rmse ~ datasets + lf*max_epoch_pmf - 1, data = D))
 
+D$density
 
 #summary(lm(bpmf_rmse ~ datasets + lf + iter - 1, data = D_bpmf)) # can use this later
 
