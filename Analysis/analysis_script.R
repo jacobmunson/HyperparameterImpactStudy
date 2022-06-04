@@ -11,7 +11,7 @@ D4 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/p
 
 ## Some dataset summary statistics
 # Dataset       | users  | items  | ratings  | density
-# ------------------------------------------------------------------------------
+# ______________________________________________________________________________
 # ML100k (D1)   | 610    | 9724   | 100836   | 0.01699968 = 100836/(610*9724)
 # ML1M (D2)     | 6040   | 3706   | 1000209  | 0.04468363 = 1000209/(6040*3706)
 # Book Crossing | 105283 | 340553 | 1149780  | 0.00003206799 = 1149780/(105283*340553)
@@ -33,14 +33,11 @@ D = bind_rows(D1, D2, D3, D4)
 D[which(D$datasets == "jester"),"datasets"] = "Jester"
 D = D %>% mutate(datasets = as.factor(datasets), lf = as.factor(lf)) #iter = as.factor(iter))
 
-
+# Options to arrange the dataset for panel graphics
 D$datasets = factor(D$datasets, levels = c("ML100k", "ML1M", "Jester", "ML10M")) # arranged by dataset size
 D$datasets = factor(D$datasets, levels = c("ML100k", "ML1M", "ML10M", "Jester")) # arranged by number of users
 D$datasets = factor(D$datasets, levels = c("Jester", "ML1M", "ML100k", "ML10M")) # arranged by number of items
 D$datasets = factor(D$datasets, levels = c("ML10M", "ML100k", "ML1M", "Jester")) # arranged by density
-
-
-
 
 # Panel of PMF results
 D %>% mutate(D = lf, Iterations = max_epoch_pmf) %>% 
