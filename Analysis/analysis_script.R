@@ -4,11 +4,17 @@ library(ggpubr)
 
 # PMF results for ML100k, ML1M, Jester, ML10M
 # I do not have BPMF results for Jester (running now, as of 6/4)
-D1 <- read_csv("C:/Users/Jacob/Documents/Experimental Design (STAT541)/541_project2_pmf_bpmf_run_results.csv")
-D2 <- read_csv("C:/Users/Jacob/Documents/Experimental Design (STAT541)/541_project2_pmf_bpmf_run_results_jester.csv")
-D3 <- read_csv("C:/Users/Jacob/Documents/Experimental Design (STAT541)/541_project2_pmf_bpmf_run_results_ml10m.csv")
+D1 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_ml100k.csv")
+D2 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_ml1m.csv")
+D3 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_jester.csv")
+D4 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_ml10m.csv")
 
-D_pmf = bind_rows(D1, D2, D3)
+
+
+
+
+
+D_pmf = bind_rows(D1, D2, D3, D4)
 D_pmf[which(D_pmf$datasets == "jester"),"datasets"] = "Jester"
 D_pmf = D_pmf %>% mutate(datasets = as.factor(datasets), lf = as.factor(lf)) #iter = as.factor(iter))
 
