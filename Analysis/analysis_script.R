@@ -8,6 +8,8 @@ D1 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/p
 D2 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_ml1m.csv")
 D3 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_jester.csv")
 D4 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_ml10m.csv")
+#D5 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_bookcrossing.csv")
+
 
 ## Some dataset summary statistics
 # Dataset       | users  | items  | ratings  | density
@@ -32,6 +34,8 @@ D4 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/p
 D = bind_rows(D1, D2, D3, D4)
 D[which(D$datasets == "jester"),"datasets"] = "Jester"
 D = D %>% mutate(datasets = as.factor(datasets), lf = as.factor(lf)) #iter = as.factor(iter))
+
+D[which(D$datasets == "Jester" & D$lf == 99),"lf"] = as.factor(100)
 
 # Options to arrange the dataset for panel graphics
 D$datasets = factor(D$datasets, levels = c("ML100k", "ML1M", "Jester", "ML10M")) # arranged by dataset size
@@ -156,10 +160,43 @@ B = D %>% mutate(D = as.factor(lf)) %>%
 ggarrange(A, B, nrow = 1, common.legend = T, legend = "bottom")
 
 
+# Side-by-side Jester PMF & BPMF
+A = D %>% mutate(D = as.factor(lf), Iterations = max_epoch_pmf) %>% 
+  filter(datasets == "Jester") %>% 
+  ggplot(aes(y = pmf_rmse, x = Iterations, color = D)) +
+  geom_point(size = 2) + 
+  geom_smooth(method = 'lm', formula = 'y~x') + 
+  theme_bw() + xlab('Iterations') + 
+  ylab('RMSE') + theme_bw() +# + facet_wrap(~datasets) + 
+  scale_x_continuous(breaks = c(unique(D$max_epoch_pmf))) + 
+  xlab("Iterations") + ggtitle("Jester")+ 
+  theme(plot.title = element_text(size = 12, face = "bold"), 
+        plot.subtitle = element_text(size = 11, face = "bold"),
+        axis.text=element_text(size=11),
+        axis.title=element_text(size=11,face="bold"))
+
+B = D %>% mutate(D = as.factor(lf)) %>% 
+  filter(datasets == "Jester") %>%
+  ggplot(aes(y = bpmf_rmse, x = iter, color = D)) +
+  geom_point(size = 2) + 
+  geom_smooth(method = 'lm', formula = 'y~x') + 
+  theme_bw() + xlab('Iteration Scheme') + 
+  ylab('RMSE') + theme_bw() + ggtitle("Jester") + 
+  theme(plot.title = element_text(size = 12, face = "bold"), 
+        plot.subtitle = element_text(size = 11, face = "bold"),
+        axis.text=element_text(size=11),
+        axis.title=element_text(size=11,face="bold"))# + facet_wrap(~datasets)
+
+ggarrange(A, B, nrow = 1, common.legend = T, legend = "bottom")
+
+
 
 summary(lm(pmf_rmse ~ datasets + lf + max_epoch_pmf - 1, data = D))
 
 summary(lm(pmf_rmse ~ datasets + lf*max_epoch_pmf - 1, data = D))
+
+summary(lm(bpmf_rmse ~ datasets + lf*iter - 1, data = D))
+
 
 D$density
 
