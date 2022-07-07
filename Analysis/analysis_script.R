@@ -8,7 +8,7 @@ D1 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/p
 D2 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_ml1m.csv")
 D3 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_jester.csv")
 D4 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_ml10m.csv")
-#D5 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_bookcrossing.csv")
+D5 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/pmf_bpmf_results_bookcrossing.csv")
 
 
 ## Some dataset summary statistics
@@ -31,17 +31,18 @@ D4 <- read_csv("C:/Users/Jacob/Documents/GitHub/HyperparameterImpactStudy/Data/p
 
 
 # Minor data cleaning
-D = bind_rows(D1, D2, D3, D4)
+D = bind_rows(D1, D2, D3, D4, D5)
 D[which(D$datasets == "jester"),"datasets"] = "Jester"
-D = D %>% mutate(datasets = as.factor(datasets), lf = as.factor(lf)) #iter = as.factor(iter))
+D[which(D$datasets == "book-crossing"),"datasets"] = "Book Crossing"
 
+D = D %>% mutate(datasets = as.factor(datasets), lf = as.factor(lf)) #iter = as.factor(iter))
 D[which(D$datasets == "Jester" & D$lf == 99),"lf"] = as.factor(100)
 
 # Options to arrange the dataset for panel graphics
-D$datasets = factor(D$datasets, levels = c("ML100k", "ML1M", "Jester", "ML10M")) # arranged by dataset size
-D$datasets = factor(D$datasets, levels = c("ML100k", "ML1M", "ML10M", "Jester")) # arranged by number of users
-D$datasets = factor(D$datasets, levels = c("Jester", "ML1M", "ML100k", "ML10M")) # arranged by number of items
-D$datasets = factor(D$datasets, levels = c("ML10M", "ML100k", "ML1M", "Jester")) # arranged by density
+D$datasets = factor(D$datasets, levels = c("ML100k", "ML1M", "Book Crossing", "Jester", "ML10M")) # arranged by dataset size
+D$datasets = factor(D$datasets, levels = c("ML100k", "ML1M", "ML10M", "Jester", "Book Crossing")) # arranged by number of users
+D$datasets = factor(D$datasets, levels = c("Jester", "ML1M", "ML100k", "ML10M", "Book Crossing")) # arranged by number of items
+D$datasets = factor(D$datasets, levels = c("Book Crossing", "ML10M", "ML100k", "ML1M", "Jester")) # arranged by density
 
 # Panel of PMF results
 D %>% mutate(D = lf, Iterations = max_epoch_pmf) %>% 
@@ -71,7 +72,7 @@ D %>% mutate(D = lf, Iterations = iter) %>%
 
 
 # Side-by-side ML100k PMF & BPMF
-A = D %>% mutate(D = lf, Iterations = max_epoch_pmf) %>% 
+A1 = D %>% mutate(D = lf, Iterations = max_epoch_pmf) %>% 
   filter(datasets == "ML100k") %>% 
   ggplot(aes(y = pmf_rmse, x = Iterations, color = D)) +
   geom_point(size = 2) + 
@@ -85,7 +86,7 @@ A = D %>% mutate(D = lf, Iterations = max_epoch_pmf) %>%
         axis.text=element_text(size=11),
         axis.title=element_text(size=11,face="bold"))
 
-B = D %>% mutate(D = as.factor(lf)) %>% 
+B1 = D %>% mutate(D = as.factor(lf)) %>% 
   filter(datasets == "ML100k") %>%
   ggplot(aes(y = bpmf_rmse, x = iter, color = D)) +
   geom_point(size = 2) + 
@@ -97,11 +98,11 @@ B = D %>% mutate(D = as.factor(lf)) %>%
         axis.text=element_text(size=11),
         axis.title=element_text(size=11,face="bold"))# + facet_wrap(~datasets)
 
-ggarrange(A, B, nrow = 1, common.legend = T, legend = "bottom")
+ggarrange(A1, B1, nrow = 1, common.legend = T, legend = "bottom")
 
 
 # Side-by-side ML1M PMF & BPMF
-A = D %>% mutate(D = as.factor(lf), Iterations = max_epoch_pmf) %>% 
+A2 = D %>% mutate(D = as.factor(lf), Iterations = max_epoch_pmf) %>% 
   filter(datasets == "ML1M") %>% 
   ggplot(aes(y = pmf_rmse, x = Iterations, color = D)) +
   geom_point(size = 2) + 
@@ -115,7 +116,7 @@ A = D %>% mutate(D = as.factor(lf), Iterations = max_epoch_pmf) %>%
         axis.text=element_text(size=11),
         axis.title=element_text(size=11,face="bold"))
 
-B = D %>% mutate(D = as.factor(lf)) %>% 
+B2 = D %>% mutate(D = as.factor(lf)) %>% 
   filter(datasets == "ML1M") %>%
   ggplot(aes(y = bpmf_rmse, x = iter, color = D)) +
   geom_point(size = 2) + 
@@ -127,11 +128,11 @@ B = D %>% mutate(D = as.factor(lf)) %>%
         axis.text=element_text(size=11),
         axis.title=element_text(size=11,face="bold"))# + facet_wrap(~datasets)
 
-ggarrange(A, B, nrow = 1, common.legend = T, legend = "bottom")
+ggarrange(A2, B2, nrow = 1, common.legend = T, legend = "bottom")
 
 
 # Side-by-side ML10M PMF & BPMF
-A = D %>% mutate(D = as.factor(lf), Iterations = max_epoch_pmf) %>% 
+A3 = D %>% mutate(D = as.factor(lf), Iterations = max_epoch_pmf) %>% 
   filter(datasets == "ML10M") %>% 
   ggplot(aes(y = pmf_rmse, x = Iterations, color = D)) +
   geom_point(size = 2) + 
@@ -145,7 +146,7 @@ A = D %>% mutate(D = as.factor(lf), Iterations = max_epoch_pmf) %>%
         axis.text=element_text(size=11),
         axis.title=element_text(size=11,face="bold"))
 
-B = D %>% mutate(D = as.factor(lf)) %>% 
+B3 = D %>% mutate(D = as.factor(lf)) %>% 
   filter(datasets == "ML10M") %>%
   ggplot(aes(y = bpmf_rmse, x = iter, color = D)) +
   geom_point(size = 2) + 
@@ -157,11 +158,11 @@ B = D %>% mutate(D = as.factor(lf)) %>%
         axis.text=element_text(size=11),
         axis.title=element_text(size=11,face="bold"))# + facet_wrap(~datasets)
 
-ggarrange(A, B, nrow = 1, common.legend = T, legend = "bottom")
+ggarrange(A3, B3, nrow = 1, common.legend = T, legend = "bottom")
 
 
 # Side-by-side Jester PMF & BPMF
-A = D %>% mutate(D = as.factor(lf), Iterations = max_epoch_pmf) %>% 
+A4 = D %>% mutate(D = as.factor(lf), Iterations = max_epoch_pmf) %>% 
   filter(datasets == "Jester") %>% 
   ggplot(aes(y = pmf_rmse, x = Iterations, color = D)) +
   geom_point(size = 2) + 
@@ -175,7 +176,7 @@ A = D %>% mutate(D = as.factor(lf), Iterations = max_epoch_pmf) %>%
         axis.text=element_text(size=11),
         axis.title=element_text(size=11,face="bold"))
 
-B = D %>% mutate(D = as.factor(lf)) %>% 
+B4 = D %>% mutate(D = as.factor(lf)) %>% 
   filter(datasets == "Jester") %>%
   ggplot(aes(y = bpmf_rmse, x = iter, color = D)) +
   geom_point(size = 2) + 
@@ -187,8 +188,42 @@ B = D %>% mutate(D = as.factor(lf)) %>%
         axis.text=element_text(size=11),
         axis.title=element_text(size=11,face="bold"))# + facet_wrap(~datasets)
 
-ggarrange(A, B, nrow = 1, common.legend = T, legend = "bottom")
+ggarrange(A4, B4, nrow = 1, common.legend = T, legend = "bottom")
 
+
+
+# Side-by-side Book Crossing PMF & BPMF
+A5 = D %>% mutate(D = as.factor(lf), Iterations = max_epoch_pmf) %>% 
+  filter(datasets == "Book Crossing") %>% 
+  ggplot(aes(y = pmf_rmse, x = Iterations, color = D)) +
+  geom_point(size = 2) + 
+  geom_smooth(method = 'lm', formula = 'y~x') + 
+  theme_bw() + xlab('Iterations') + 
+  ylab('RMSE') + theme_bw() +# + facet_wrap(~datasets) + 
+  scale_x_continuous(breaks = c(unique(D$max_epoch_pmf))) + 
+  xlab("Iterations") + ggtitle("Book Crossing")+ 
+  theme(plot.title = element_text(size = 12, face = "bold"), 
+        plot.subtitle = element_text(size = 11, face = "bold"),
+        axis.text=element_text(size=11),
+        axis.title=element_text(size=11,face="bold"))
+
+B5 = D %>% mutate(D = as.factor(lf)) %>% 
+  filter(datasets == "Book Crossing") %>%
+  ggplot(aes(y = bpmf_rmse, x = iter, color = D)) +
+  geom_point(size = 2) + 
+  geom_smooth(method = 'lm', formula = 'y~x') + 
+  theme_bw() + xlab('Iteration Scheme') + 
+  ylab('RMSE') + theme_bw() + ggtitle("Book Crossing") + 
+  theme(plot.title = element_text(size = 12, face = "bold"), 
+        plot.subtitle = element_text(size = 11, face = "bold"),
+        axis.text=element_text(size=11),
+        axis.title=element_text(size=11,face="bold"))# + facet_wrap(~datasets)
+
+ggarrange(A5, B5, nrow = 1, common.legend = T, legend = "bottom")
+
+
+ggarrange(A1, A2, A3, A4, A5, B1, B2, B3, B4, B5, 
+          nrow = 2, ncol = 5, common.legend = T, legend = "bottom")
 
 
 summary(lm(pmf_rmse ~ datasets + lf + max_epoch_pmf - 1, data = D))
